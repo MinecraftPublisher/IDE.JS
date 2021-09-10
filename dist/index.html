@@ -7,18 +7,17 @@
 </head>
 
 <body>
-  <textarea class="editor" placeholder='"use strict"
+  <textarea class="editor" placeholder="&quot;use strict&quot;
 
 function welcome() {
-  console.log("Welcome to IDE.JS!");
-  console.log("IDE.JS is an online Javascript IDE for your responsive webapp developement needs.");
-  console.log("No HTML included, No CSS included, Only Javascript.");
-  console.log("We have a builtin library injector to add our IDE.JS library to your code at runtime.");
-}'></textarea>
+  console.log(&quot;Welcome to IDE.JS!&quot;);
+  console.log(&quot;IDE.JS is an online Javascript IDE for your responsive webapp developement needs.&quot;);
+  console.log(&quot;No HTML included, No CSS included, Only Javascript.&quot;);
+  console.log(&quot;We have a builtin library injector to add our IDE.JS library to your code at runtime.&quot;);
+}"></textarea>
 </body>
 
-<style>
-  html {
+<style>html {
     height: 100%;
     width: 100%;
     margin: 0;
@@ -53,16 +52,13 @@ function welcome() {
 
   .editor:focus {
     border: none;
-  }
-</style>
+  }</style>
  hello
 <!-- Implement service workers -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then(function () { console.log("Service Worker Registered"); });
-  }
-</script>
+<script>if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register("/sw.js").then(function () {
+    console.log("Service Worker Registered");
+  });
+}</script>
 
 </html>
