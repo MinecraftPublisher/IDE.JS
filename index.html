@@ -1,61 +1,99 @@
-<!DOCTYPE html>
 <html>
 
 <head>
   <meta charset="UTF-8">
   <title>IDE.JS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=0">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
+  </link>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js">
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/theme/monokai.min.css">
+  <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
 </head>
 
 <body>
-  <textarea class="editor" placeholder='"use strict"
 
-function welcome() {
-  console.log("Welcome to IDE.JS!");
-  console.log("IDE.JS is an online Javascript IDE for your responsive webapp developement needs.");
-  console.log("No HTML included, No CSS included, Only Javascript.");
-  console.log("We have a builtin library injector to add our IDE.JS library to your code at runtime.");
-}'></textarea>
+  <div class=wrap>
+    <div class=border>
+      <div class="editor">
+      </div>
+    </div>
+  </div>
+  <div class="result"><iframe class="iframe"></iframe></div>
+  <button class="copy">Copy Data URI to clipboard</button>
 </body>
 
 <style>
-  html {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    background: #080808;
-  }
-
+  html,
   body {
     height: 100%;
-    width: 100%;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background: #272823;
+  }
+
+  .copy {
+    position: fixed;
+    padding: -5px;
+    height: 100px;
+    width: 100px;
+    border-radius: 5px;
+    background-color: #272823;
+    border: 2px solid crimson;
+    bottom: 5px;
+    right: 5px;
+    color: grey;
+  }
+
+  .border {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    position: relative;
+    height: 65%;
+  }
+
+  .iframe {
+    width: 99vw;
+    height: 100%;
+    min-height: 40vh;
+    border: none;
+    font-family: Arial;
+    color: grey;
+  }
+
+  .result {
+    padding-top: 5px;
+    border: none;
+    border-top: 5px solid red;
+    margin: 0;
+    background: #272823;
+    width: 100vw;
+    height: 30vh;
+    background: grey;
+    position: fixed;
+    bottom: 0px;
+    background: grey;
+  }
+
+  .CodeMirror {
+    font-size: 1.4rem;
+    height: 50vh;
   }
 
   .editor {
-    font-size: 15px;
-    background: #080808;
-    border: none;
-    width: 98.5vw;
-    height: 98vh;
-    margin: -2px;
-    color: #d9d9d9;
-
-    border: none;
-    overflow: auto;
-    outline: none;
-
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-
-    resize: none;
-  }
-
-  .editor:focus {
-    border: none;
+    margin: 0;
+    margin: -3px;
+    margin-bottom: -5px;
+    width: 99vw;
+    height: 50vh;
   }
 </style>
- hello
+
 <!-- Implement service workers -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -63,6 +101,78 @@ function welcome() {
       .register('/sw.js')
       .then(function () { console.log("Service Worker Registered"); });
   }
+</script>
+
+<script>
+
+  var editor = CodeMirror(document.querySelector('.editor'), {
+    lineNumbers: true,
+    tabSize: 2,
+    value: '"use strict"\n/* IDE.JS - v0.2b */\n',
+    theme: 'monokai',
+    lineWrapping: true
+  })
+
+  var db = new Dexie("IDE_JS")
+  db.version(1).stores({
+    data: "data"
+  })
+  db.open()
+
+  function start() {
+    console.log("IndexedDB storage is active.")
+    db.data.toArray().then((result) => {
+      if (result.length == 0) {
+        editor.setValue('"use strict"\n/* IDE.JS - v0.2b */\n')
+      }
+      else {
+        editor.setValue(result[0].data)
+      }
+    })
+
+    setInterval(fetch, 500)
+  }
+
+  function fetch() {
+    db.data.toCollection().modify(data => {
+      data.data = editor.getValue()
+    }).then(() => {
+      db.data.toArray().then((result) => {
+        if (result.length == 0) {
+          db.data.add({
+            data: '"use strict"\n/* IDE.JS - v0.2v */'
+          })
+          editor.setValue('"use strict"\n/* IDE.JS - v0.2b */\n')
+        }
+      })
+    })
+    setResult()
+  }
+
+  function resetIframe() {
+    document.querySelector(".result").innerHTML = ""
+  }
+
+  function setResult() {
+    const html = 'data:text/html;charset=utf-8;base64,' + btoa(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"><script src="/idelib.js"></head><body><style>body{color:grey;font-family:Arial,sans-serif;}</style><\/script><script>` + editor.getValue() + '<\/script></body></html>')
+    if (document.querySelector(".iframe").src != html) {
+      resetIframe()
+      const iframe = document.createElement("iframe")
+      iframe.className = "iframe";
+      iframe.src = html;
+      document.querySelector(".result").appendChild(iframe);
+    }
+  }
+
+  function update() {
+    resetIframe()
+    const iframe = document.createElement("iframe")
+    iframe.className = "iframe";
+    iframe.src = 'data:text/html;charset=utf-8;base64,' + btoa('<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"></head><body><h3 style="color: grey; font-family: Arial, sans-serif;">Type in some code to get started...</h3></body></html>')
+    document.querySelector(".result").appendChild(iframe);
+  }
+
+  start()
 </script>
 
 </html>

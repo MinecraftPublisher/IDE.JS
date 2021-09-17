@@ -4,18 +4,18 @@ self.addEventListener('install', function (e) {
             return cache.addAll([
                 '/',
                 '/index.html',
-                '/index.html?homescreen=1',
-                '/?homescreen=1'
+                '/idelib.js',
+                '/favicon.png'
             ]);
         })
     );
 });
 
 self.addEventListener('fetch', function (event) {
-    console.log(event.request.url);
 
     event.respondWith(
         caches.match(event.request).then(function (response) {
+            console.log(event.request.url + " was loaded via cache");
             return response || fetch(event.request);
         })
     );
